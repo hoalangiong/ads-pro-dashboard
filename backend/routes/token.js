@@ -47,7 +47,7 @@ router.get('/validate', requireAuth, async (req, res) => {
     // Check token expiry
     const debugR = await fetch(`${FB_API}/debug_token?input_token=${token}&access_token=${token}`);
     const debugData = await debugR.json();
-    if (debugData.data?.expires_at) {
+    if (!debugData.error && debugData.data?.expires_at !== undefined) {
       results.expires_at = debugData.data.expires_at; // unix timestamp, 0 = never expires
     }
 
