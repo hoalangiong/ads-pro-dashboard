@@ -29,7 +29,7 @@ router.post('/', requireAuth, (req, res) => {
   const { object_id, text } = req.body;
   if (!object_id || !text?.trim()) return res.status(400).json({ error: 'object_id and text required' });
   const notes = load();
-  const note = { id: Date.now().toString(), object_id, text: text.trim(), created_at: new Date().toISOString() };
+  const note = { id: Date.now().toString() + Math.random().toString(36).slice(2, 7), object_id, text: text.trim(), created_at: new Date().toISOString() };
   notes.push(note);
   save(notes);
   res.json(note);

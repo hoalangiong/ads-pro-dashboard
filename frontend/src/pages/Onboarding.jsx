@@ -24,7 +24,7 @@ export default function Onboarding() {
       const r = await api.validateToken(token);
       setValidation(r);
       if (r.valid && r.adAccounts?.length === 1) setSelectedAccount(r.adAccounts[0].id);
-      if (r.valid && r.expires_at) localStorage.setItem('fb_token_expires_at', r.expires_at);
+      if (r.valid && r.expires_at != null) localStorage.setItem('fb_token_expires_at', r.expires_at);
     } catch (e) {
       setValidation({ valid: false, errors: [e.message] });
     } finally {

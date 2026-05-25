@@ -78,7 +78,7 @@ cron.schedule('0 8-22 * * *', async () => {
   try {
     const FB_API = 'https://graph.facebook.com/v19.0';
     const FIELDS = 'campaign_id,campaign_name,impressions,reach,frequency,clicks,ctr,cpc,cpm,spend,purchase_roas,conversions';
-    const r = await fetch(`${FB_API}/${fbAccount}/insights?fields=${FIELDS}&level=campaign&date_preset=today&limit=50&access_token=${fbToken}`);
+    const r = await fetch(`${FB_API}/${fbAccount}/insights?fields=${FIELDS}&level=campaign&date_preset=today&limit=100&access_token=${fbToken}`);
     const { data } = await r.json();
     if (!data?.length) return;
 
@@ -112,7 +112,7 @@ cron.schedule('0 8-22 * * *', async () => {
     // Budget pacing alert — warn if >85% spent before 14:00
     const now = new Date();
     if (now.getHours() < 14 && tgChatId) {
-      const campR = await fetch(`${FB_API}/${fbAccount}/campaigns?fields=id,name,daily_budget,status&limit=50&access_token=${fbToken}`);
+      const campR = await fetch(`${FB_API}/${fbAccount}/campaigns?fields=id,name,daily_budget,status&limit=100&access_token=${fbToken}`);
       const campData = await campR.json();
       const activeCamps = (campData.data || []).filter(c => c.status === 'ACTIVE' && c.daily_budget);
       const spendMap = {};
