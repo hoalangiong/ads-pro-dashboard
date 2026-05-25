@@ -99,11 +99,8 @@ export const api = {
   updateGoal: (id, data) => req(`/goals/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteGoal: (id) => req(`/goals/${id}`, { method: 'DELETE' }),
 
-  validateToken: (fbToken) => {
-    return fetch('/api/token/validate', {
-      headers: { ...authHeaders(), 'x-fb-token': fbToken, 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt') || ''}` },
-    }).then(r => r.json());
-  },
+  validateToken: (fbToken) =>
+    req('/token/validate', { headers: { 'x-fb-token': fbToken } }),
 
   clearCache: () => req('/cache/clear', { method: 'POST' }),
 };

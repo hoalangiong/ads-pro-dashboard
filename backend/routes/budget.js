@@ -51,8 +51,10 @@ router.post('/resume', requireAuth, async (req, res) => {
 router.post('/adjust', requireAuth, async (req, res) => {
   const { objectId, daily_budget } = req.body;
   if (!objectId || !daily_budget) return res.status(400).json({ error: 'objectId and daily_budget required' });
+  const budgetVal = parseFloat(daily_budget);
+  if (isNaN(budgetVal) || budgetVal <= 0) return res.status(400).json({ error: 'daily_budget phải là số dương' });
   // FB API expects budget in cents (VND * 100)
-  const budgetCents = Math.round(parseFloat(daily_budget) * 100);
+  const budgetCents = Math.round(budgetVal * 100);
   try {
     const r = await fetch(`${FB_API}/${objectId}`, {
       method: 'POST',

@@ -37,10 +37,10 @@ router.get('/', requireAuth, async (req, res) => {
     const enriched = (data.data || []).map(row => ({
       ...row,
       roas: parseFloat(row.purchase_roas?.[0]?.value || 0),
-      video_retention_pct: row.video_p100_watched_actions?.[0]?.value && row.video_play_actions?.[0]?.value
+      video_retention_pct: row.video_p100_watched_actions?.[0]?.value && parseFloat(row.video_play_actions?.[0]?.value) > 0
         ? (parseFloat(row.video_p100_watched_actions[0].value) / parseFloat(row.video_play_actions[0].value) * 100).toFixed(1)
         : null,
-      hook_rate: row.video_p25_watched_actions?.[0]?.value && row.video_play_actions?.[0]?.value
+      hook_rate: row.video_p25_watched_actions?.[0]?.value && parseFloat(row.video_play_actions?.[0]?.value) > 0
         ? (parseFloat(row.video_p25_watched_actions[0].value) / parseFloat(row.video_play_actions[0].value) * 100).toFixed(1)
         : null,
     }));

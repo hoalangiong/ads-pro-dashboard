@@ -110,7 +110,7 @@ export default function Goals() {
           if (hasData && g.target > 0) {
             pct = g.higherIsBetter
               ? Math.min((actual / g.target) * 100, 100)
-              : Math.min((g.target / actual) * 100, 100);
+              : actual > 0 ? Math.min((g.target / actual) * 100, 100) : 0;
           }
 
           return (
