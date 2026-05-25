@@ -74,12 +74,18 @@ export default function Dashboard() {
   const [tokenWarning, setTokenWarning] = useState('');
 
   useEffect(() => {
-    const expiresAt = parseInt(localStorage.getItem('fb_token_expires_at') || '0');
-    if (!expiresAt) return;
-    const daysLeft = Math.floor((expiresAt * 1000 - Date.now()) / (1000 * 60 * 60 * 24));
-    if (daysLeft === 0) setTokenWarning('FB Token hết hạn hôm nay. Vào Onboarding để cập nhật ngay.');
-    else if (daysLeft > 0 && daysLeft < 7) setTokenWarning(`FB Token sắp hết hạn trong ${daysLeft} ngày. Vào Onboarding để cập nhật.`);
-    else if (daysLeft < 0) setTokenWarning('FB Token đã hết hạn. Vào Onboarding để cập nhật token mới.');
+    const check = () => {
+      const expiresAt = parseInt(localStorage.getItem('fb_token_expires_at') || '0');
+      if (!expiresAt) { setTokenWarning(''); return; }
+      const daysLeft = Math.floor((expiresAt * 1000 - Date.now()) / (1000 * 60 * 60 * 24));
+      if (daysLeft === 0) setTokenWarning('FB Token hết hạn hôm nay. Vào Onboarding để cập nhật ngay.');
+      else if (daysLeft > 0 && daysLeft < 7) setTokenWarning(`FB Token sắp hết hạn trong ${daysLeft} ngày. Vào Onboarding để cập nhật.`);
+      else if (daysLeft < 0) setTokenWarning('FB Token đã hết hạn. Vào Onboarding để cập nhật token mới.');
+      else setTokenWarning('');
+    };
+    check();
+    window.addEventListener('storage', check);
+    return () => window.removeEventListener('storage', check);
   }, []);
 
   useEffect(() => {

@@ -8,21 +8,31 @@ const STATUS_COLOR = { ACTIVE: 'text-green-400', PAUSED: 'text-yellow-400', ARCH
 function NotesPanel({ objectId, onClose }) {
   const [notes, setNotes] = useState([]);
   const [text, setText] = useState('');
+  const [loadingNotes, setLoadingNotes] = useState(false);
+  const [noteError, setNoteError] = useState('');
 
   useEffect(() => {
-    api.notes(objectId).then(setNotes).catch(() => {});
+    setLoadingNotes(true);
+    api.notes(objectId)
+      .then(setNotes)
+      .catch(e => setNoteError(e.message))
+      .finally(() => setLoadingNotes(false));
   }, [objectId]);
 
   const add = async () => {
     if (!text.trim()) return;
-    const note = await api.addNote(objectId, text);
-    setNotes(n => [...n, note]);
-    setText('');
+    try {
+      const note = await api.addNote(objectId, text);
+      setNotes(n => [...n, note]);
+      setText('');
+    } catch (e) { setNoteError(e.message); }
   };
 
   const remove = async (id) => {
-    await api.deleteNote(id);
-    setNotes(n => n.filter(x => x.id !== id));
+    try {
+      await api.deleteNote(id);
+      setNotes(n => n.filter(x => x.id !== id));
+    } catch (e) { setNoteError(e.message); }
   };
 
   return (
@@ -32,8 +42,10 @@ function NotesPanel({ objectId, onClose }) {
           <p className="font-semibold text-sm">Ghi chú</p>
           <button onClick={onClose} className="text-gray-500 hover:text-white"><X size={16} /></button>
         </div>
+        {noteError && <p className="text-red-400 text-xs mb-2">{noteError}</p>}
         <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
-          {notes.length === 0 && <p className="text-gray-500 text-sm text-center py-4">Chưa có ghi chú</p>}
+          {loadingNotes && <p className="text-gray-500 text-sm text-center py-4">Đang tải...</p>}
+          {!loadingNotes && notes.length === 0 && <p className="text-gray-500 text-sm text-center py-4">Chưa có ghi chú</p>}
           {notes.map(n => (
             <div key={n.id} className="flex items-start gap-2 bg-gray-800 rounded-lg px-3 py-2 text-sm">
               <div className="flex-1 min-w-0">
