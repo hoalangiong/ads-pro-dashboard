@@ -44,6 +44,13 @@ router.get('/validate', requireAuth, async (req, res) => {
       results.errors.push(`Không lấy được ad accounts: ${acctData.error.message}`);
     }
 
+    // Check token expiry
+    const debugR = await fetch(`${FB_API}/debug_token?input_token=${token}&access_token=${token}`);
+    const debugData = await debugR.json();
+    if (debugData.data?.expires_at) {
+      results.expires_at = debugData.data.expires_at; // unix timestamp, 0 = never expires
+    }
+
   } catch (e) {
     results.errors.push(e.message);
   }

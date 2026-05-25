@@ -102,5 +102,9 @@ export const api = {
   validateToken: (fbToken) =>
     req('/token/validate', { headers: { 'x-fb-token': fbToken } }),
 
+  notes: (objectId) => req(`/notes?object_id=${objectId}`),
+  addNote: (objectId, text) => req('/notes', { method: 'POST', body: JSON.stringify({ object_id: objectId, text }) }),
+  deleteNote: (id) => req(`/notes/${id}`, { method: 'DELETE' }),
+
   clearCache: () => req('/cache/clear', { method: 'POST' }),
 };

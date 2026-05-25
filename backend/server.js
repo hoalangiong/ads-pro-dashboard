@@ -18,6 +18,7 @@ import reportsRoutes from './routes/reports.js';
 import creativesRoutes from './routes/creatives.js';
 import tokenRoutes from './routes/token.js';
 import goalsRoutes, { loadGoals } from './routes/goals.js';
+import notesRoutes from './routes/notes.js';
 import { clear as cacheClear } from './cache.js';
 
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/api/reports', reportsRoutes);
 app.use('/api/creatives', creativesRoutes);
 app.use('/api/token', tokenRoutes);
 app.use('/api/goals', goalsRoutes);
+app.use('/api/notes', notesRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
@@ -66,8 +68,8 @@ app.get('*', (req, res) => {
   }
 });
 
-// Auto-check alerts every hour
-cron.schedule('0 * * * *', async () => {
+// Auto-check alerts every hour 8h-22h
+cron.schedule('0 8-22 * * *', async () => {
   const fbToken = process.env.FB_ACCESS_TOKEN;
   const fbAccount = process.env.FB_AD_ACCOUNT_ID;
   const tgChatId = process.env.TELEGRAM_ALERT_CHAT_ID;
@@ -75,7 +77,7 @@ cron.schedule('0 * * * *', async () => {
 
   try {
     const FB_API = 'https://graph.facebook.com/v19.0';
-    const FIELDS = 'campaign_name,impressions,reach,frequency,clicks,ctr,cpc,cpm,spend,purchase_roas,conversions';
+    const FIELDS = 'campaign_id,campaign_name,impressions,reach,frequency,clicks,ctr,cpc,cpm,spend,purchase_roas,conversions';
     const r = await fetch(`${FB_API}/${fbAccount}/insights?fields=${FIELDS}&level=campaign&date_preset=today&limit=50&access_token=${fbToken}`);
     const { data } = await r.json();
     if (!data?.length) return;
@@ -105,6 +107,32 @@ cron.schedule('0 * * * *', async () => {
         `⚠️ <b>${t.rule}</b>\n📌 ${t.name}\n📊 ${t.metric}: <b>${typeof t.value === 'number' ? t.value.toFixed(2) : t.value}</b>`
       ).join('\n\n');
       await sendMessage(tgChatId, `🔔 <b>Ads Alert tự động</b>\n\n${lines}\n\n🕐 ${new Date().toLocaleString('vi-VN')}`);
+    }
+
+    // Budget pacing alert — warn if >85% spent before 14:00
+    const now = new Date();
+    if (now.getHours() < 14 && tgChatId) {
+      const campR = await fetch(`${FB_API}/${fbAccount}/campaigns?fields=id,name,daily_budget,status&limit=50&access_token=${fbToken}`);
+      const campData = await campR.json();
+      const activeCamps = (campData.data || []).filter(c => c.status === 'ACTIVE' && c.daily_budget);
+      const spendMap = {};
+      for (const row of data) {
+        if (row.campaign_id) spendMap[row.campaign_id] = parseFloat(row.spend || 0);
+      }
+      const pacingAlerts = activeCamps.filter(c => {
+        const budget = parseInt(c.daily_budget) / 100;
+        const spent = spendMap[c.id] || 0;
+        return budget > 0 && spent / budget > 0.85;
+      });
+      if (pacingAlerts.length) {
+        const lines = pacingAlerts.map(c => {
+          const budget = parseInt(c.daily_budget) / 100;
+          const spent = spendMap[c.id] || 0;
+          const pct = Math.round(spent / budget * 100);
+          return `💸 <b>${c.name}</b>\n   Đã tiêu: ${spent.toLocaleString('vi-VN')}đ / ${budget.toLocaleString('vi-VN')}đ (${pct}%)`;
+        }).join('\n\n');
+        await sendMessage(tgChatId, `⚡ <b>Budget sắp hết trước 14:00</b>\n\n${lines}\n\n🕐 ${new Date().toLocaleString('vi-VN')}`);
+      }
     }
 
     // KPI goals check (account-level today)

@@ -1,9 +1,65 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 import { useAccount } from '../context/AccountContext.jsx';
-import { Download, Pause, Play } from 'lucide-react';
+import { Download, Pause, Play, StickyNote, X, Plus } from 'lucide-react';
 
 const STATUS_COLOR = { ACTIVE: 'text-green-400', PAUSED: 'text-yellow-400', ARCHIVED: 'text-gray-500' };
+
+function NotesPanel({ objectId, onClose }) {
+  const [notes, setNotes] = useState([]);
+  const [text, setText] = useState('');
+
+  useEffect(() => {
+    api.notes(objectId).then(setNotes).catch(() => {});
+  }, [objectId]);
+
+  const add = async () => {
+    if (!text.trim()) return;
+    const note = await api.addNote(objectId, text);
+    setNotes(n => [...n, note]);
+    setText('');
+  };
+
+  const remove = async (id) => {
+    await api.deleteNote(id);
+    setNotes(n => n.filter(x => x.id !== id));
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5 w-full max-w-md shadow-xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <p className="font-semibold text-sm">Ghi chú</p>
+          <button onClick={onClose} className="text-gray-500 hover:text-white"><X size={16} /></button>
+        </div>
+        <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
+          {notes.length === 0 && <p className="text-gray-500 text-sm text-center py-4">Chưa có ghi chú</p>}
+          {notes.map(n => (
+            <div key={n.id} className="flex items-start gap-2 bg-gray-800 rounded-lg px-3 py-2 text-sm">
+              <div className="flex-1 min-w-0">
+                <p className="text-gray-200 break-words">{n.text}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{new Date(n.created_at).toLocaleString('vi-VN')}</p>
+              </div>
+              <button onClick={() => remove(n.id)} className="text-gray-600 hover:text-red-400 shrink-0 mt-0.5"><X size={12} /></button>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <input
+            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm"
+            placeholder="Thêm ghi chú..."
+            value={text}
+            onChange={e => setText(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && add()}
+          />
+          <button onClick={add} className="bg-brand-600 hover:bg-brand-700 px-3 py-2 rounded-lg text-sm transition-colors">
+            <Plus size={14} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Campaigns() {
   const { accounts, selected, select } = useAccount();
@@ -14,6 +70,7 @@ export default function Campaigns() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
+  const [notesFor, setNotesFor] = useState(null);
 
   useEffect(() => {
     if (!selected?.id) return;
@@ -53,6 +110,7 @@ export default function Campaigns() {
 
   return (
     <div>
+      {notesFor && <NotesPanel objectId={notesFor} onClose={() => setNotesFor(null)} />}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
         <h1 className="text-xl font-bold">Campaigns</h1>
         <div className="flex gap-2 flex-wrap">
@@ -142,18 +200,27 @@ export default function Campaigns() {
                     {ins?.impressions ? parseInt(ins.impressions).toLocaleString('vi-VN') : '—'}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {r.status !== 'ARCHIVED' && (
+                    <div className="flex items-center justify-end gap-1">
+                      {r.status !== 'ARCHIVED' && (
+                        <button
+                          onClick={() => toggleStatus(r)}
+                          className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
+                            r.status === 'ACTIVE'
+                              ? 'bg-yellow-900 text-yellow-300 hover:bg-yellow-800'
+                              : 'bg-green-900 text-green-300 hover:bg-green-800'
+                          }`}
+                        >
+                          {r.status === 'ACTIVE' ? <><Pause size={11} /> Dừng</> : <><Play size={11} /> Bật</>}
+                        </button>
+                      )}
                       <button
-                        onClick={() => toggleStatus(r)}
-                        className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
-                          r.status === 'ACTIVE'
-                            ? 'bg-yellow-900 text-yellow-300 hover:bg-yellow-800'
-                            : 'bg-green-900 text-green-300 hover:bg-green-800'
-                        }`}
+                        onClick={() => setNotesFor(r.id)}
+                        className="p-1 text-gray-500 hover:text-brand-400 transition-colors"
+                        title="Ghi chú"
                       >
-                        {r.status === 'ACTIVE' ? <><Pause size={11} /> Dừng</> : <><Play size={11} /> Bật</>}
+                        <StickyNote size={13} />
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               );

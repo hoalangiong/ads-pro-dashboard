@@ -3,7 +3,7 @@ import { api } from '../lib/api.js';
 import { useAccount } from '../context/AccountContext.jsx';
 import StatCard from '../components/StatCard.jsx';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { CheckCircle, XCircle, Pause, Play, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, Pause, Play, RefreshCw, AlertTriangle } from 'lucide-react';
 
 function prevPeriodRange(preset) {
   const now = new Date();
@@ -71,6 +71,15 @@ export default function Dashboard() {
   }, [selected?.id, datePreset]);
 
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [tokenWarning, setTokenWarning] = useState('');
+
+  useEffect(() => {
+    const expiresAt = parseInt(localStorage.getItem('fb_token_expires_at') || '0');
+    if (!expiresAt) return;
+    const daysLeft = Math.floor((expiresAt * 1000 - Date.now()) / (1000 * 60 * 60 * 24));
+    if (daysLeft >= 0 && daysLeft < 7) setTokenWarning(`FB Token sắp hết hạn trong ${daysLeft} ngày. Vào Onboarding để cập nhật.`);
+    else if (daysLeft < 0) setTokenWarning('FB Token đã hết hạn. Vào Onboarding để cập nhật token mới.');
+  }, []);
 
   useEffect(() => {
     if (!autoRefresh) return;
@@ -179,6 +188,12 @@ export default function Dashboard() {
 
       {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
       {loading && <p className="text-gray-400 text-sm mb-4">Đang tải...</p>}
+      {tokenWarning && (
+        <div className="flex items-center gap-2 bg-yellow-900/40 border border-yellow-700 rounded-xl px-4 py-3 mb-4 text-yellow-300 text-sm">
+          <AlertTriangle size={15} className="shrink-0" />
+          {tokenWarning}
+        </div>
+      )}
       {actionError && <p className="text-red-400 text-sm mb-4">{actionError}</p>}
       {actionMsg && <p className="text-green-400 text-sm mb-4">{actionMsg}</p>}
 
