@@ -1,0 +1,11 @@
+# Caddy config for Ads Dashboard on VPS
+# Place at /etc/caddy/Caddyfile or append to existing
+
+ads.yourdomain.com {
+    reverse_proxy localhost:3001
+}
+
+# If using IP directly (no domain):
+# :80 {
+#     reverse_proxy localhost:3001
+# }
