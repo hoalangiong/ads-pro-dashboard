@@ -19,6 +19,7 @@ import creativesRoutes from './routes/creatives.js';
 import tokenRoutes from './routes/token.js';
 import goalsRoutes, { loadGoals } from './routes/goals.js';
 import notesRoutes from './routes/notes.js';
+import launchRoutes from './routes/launch.js';
 import { clear as cacheClear } from './cache.js';
 
 dotenv.config();
@@ -49,6 +50,7 @@ app.use('/api/creatives', creativesRoutes);
 app.use('/api/token', tokenRoutes);
 app.use('/api/goals', goalsRoutes);
 app.use('/api/notes', notesRoutes);
+app.use('/api/launch', launchRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

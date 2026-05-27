@@ -106,5 +106,8 @@ export const api = {
   addNote: (objectId, text) => req('/notes', { method: 'POST', body: JSON.stringify({ object_id: objectId, text }) }),
   deleteNote: (id) => req(`/notes/${id}`, { method: 'DELETE' }),
 
+  searchInterests: (q) => req(`/launch/search-interests?q=${encodeURIComponent(q)}`),
+  launchCampaign: (data) => req('/launch/create', { method: 'POST', body: JSON.stringify(data) }),
+
   clearCache: () => req('/cache/clear', { method: 'POST' }),
 };

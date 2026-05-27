@@ -27,6 +27,10 @@ export default function Settings() {
     try {
       const result = await api.validateToken(token);
       setValidation(result);
+      if (result.valid && result.expires_at != null) {
+        localStorage.setItem('fb_token_expires_at', result.expires_at);
+        window.dispatchEvent(new Event('storage'));
+      }
       // Auto-fill account if only one
       if (result.adAccounts?.length === 1 && !accountId) {
         setAccountId(result.adAccounts[0].id);
@@ -132,7 +136,7 @@ export default function Settings() {
                       <p className="text-xs text-gray-500">{a.id} · {a.currency}</p>
                     </div>
                     <button
-                      onClick={() => { setAccountId(a.id); localStorage.setItem('fb_account_id', a.id); setSaved(true); setTimeout(() => setSaved(false), 1500); }}
+                      onClick={() => { setAccountId(a.id); localStorage.setItem('fb_account_id', a.id); refresh(); setSaved(true); setTimeout(() => setSaved(false), 1500); }}
                       className="text-xs bg-brand-600 hover:bg-brand-700 px-2 py-1 rounded transition-colors"
                     >
                       Chọn

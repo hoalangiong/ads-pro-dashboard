@@ -72,7 +72,7 @@ export default function Alerts() {
     setTesting(true); setMsg(''); setError('');
     try {
       const { data } = await api.insights(selected.id, 'campaign', 'today');
-      if (!data?.length) { setError('Không có dữ liệu hôm nay'); return; }
+      if (!data?.length) { setError('Không có dữ liệu hôm nay'); setTesting(false); return; }
       const { triggered } = await api.checkAlerts(data);
       if (triggered.length === 0) {
         setMsg('Không có alert nào được kích hoạt');

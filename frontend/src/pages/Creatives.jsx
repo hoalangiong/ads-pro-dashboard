@@ -131,7 +131,7 @@ export default function Creatives() {
                   <td className={`px-4 py-3 text-right font-medium ${roas >= 3 ? 'text-green-400' : roas > 0 && roas < 1.5 ? 'text-red-400' : 'text-gray-300'}`}>
                     {roas > 0 ? `${roas.toFixed(2)}x` : '—'}
                   </td>
-                  <td className={`px-4 py-3 text-right ${ctr >= 2 ? 'text-green-400' : ctr >= 1 ? 'text-yellow-400' : 'text-red-400'}`}>
+                  <td className={`px-4 py-3 text-right ${ctr >= 2 ? 'text-green-400' : ctr >= 1 ? 'text-yellow-400' : ctr > 0 ? 'text-red-400' : 'text-gray-500'}`}>
                     {ctr > 0 ? `${ctr.toFixed(2)}%` : '—'}
                   </td>
                   <td className="px-4 py-3 text-right text-gray-300">{row.cpc ? `${parseFloat(row.cpc).toLocaleString('vi-VN')}đ` : '—'}</td>
