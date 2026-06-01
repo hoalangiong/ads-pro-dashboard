@@ -18,6 +18,17 @@ import Creatives from './pages/Creatives.jsx';
 import Onboarding from './pages/Onboarding.jsx';
 import Goals from './pages/Goals.jsx';
 
+import AutoRules from './pages/AutoRules.jsx';
+import Fatigue from './pages/Fatigue.jsx';
+import Dayparting from './pages/Dayparting.jsx';
+import Overlap from './pages/Overlap.jsx';
+import Funnel from './pages/Funnel.jsx';
+import ABTest from './pages/ABTest.jsx';
+import Spy from './pages/Spy.jsx';
+import Predict from './pages/Predict.jsx';
+import Landing from './pages/Landing.jsx';
+import AutoReply from './pages/AutoReply.jsx';
+
 function RequireAuth({ children }) {
   const jwt = localStorage.getItem('jwt');
   if (!jwt) return <Navigate to="/login" replace />;
@@ -52,6 +63,16 @@ export default function App() {
               <Route path="/creatives" element={<Creatives />} />
               <Route path="/goals" element={<Goals />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/autorules" element={<AutoRules />} />
+              <Route path="/fatigue" element={<Fatigue />} />
+              <Route path="/dayparting" element={<Dayparting />} />
+              <Route path="/overlap" element={<Overlap />} />
+              <Route path="/funnel" element={<Funnel />} />
+              <Route path="/abtest" element={<ABTest />} />
+              <Route path="/spy" element={<Spy />} />
+              <Route path="/predict" element={<Predict />} />
+              <Route path="/landing" element={<Landing />} />
+              <Route path="/autoreply" element={<AutoReply />} />
             </Routes>
           </Layout>
         </RequireAuth>

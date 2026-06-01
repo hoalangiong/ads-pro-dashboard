@@ -110,4 +110,59 @@ export const api = {
   launchCampaign: (data) => req('/launch/create', { method: 'POST', body: JSON.stringify(data) }),
 
   clearCache: () => req('/cache/clear', { method: 'POST' }),
+
+  // Auto Rules
+  autoRules: () => req('/autorules'),
+  createAutoRule: (rule) => req('/autorules', { method: 'POST', body: JSON.stringify(rule) }),
+  updateAutoRule: (id, data) => req(`/autorules/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteAutoRule: (id) => req(`/autorules/${id}`, { method: 'DELETE' }),
+  autoRulesLog: () => req('/autorules/log'),
+  executeAutoRules: () => req('/autorules/execute', { method: 'POST' }),
+
+  // Creative Fatigue
+  fatigue: (accountId) => req(`/fatigue?account_id=${accountId}`),
+
+  // Dayparting
+  dayparting: (accountId, datePreset = 'last_7d') => req(`/dayparting?account_id=${accountId}&date_preset=${datePreset}`),
+
+  // Overlap
+  overlap: (accountId) => req(`/overlap?account_id=${accountId}`),
+  overlapCheck: (adsetA, adsetB) => req('/overlap/check', { method: 'POST', body: JSON.stringify({ adset_a: adsetA, adset_b: adsetB }) }),
+
+  // Funnel
+  funnel: (accountId, datePreset = 'last_7d', campaignId) => {
+    let qs = `/funnel?account_id=${accountId}&date_preset=${datePreset}`;
+    if (campaignId) qs += `&campaign_id=${campaignId}`;
+    return req(qs);
+  },
+
+  // A/B Test
+  abTests: () => req('/abtest'),
+  createABTest: (data) => req('/abtest', { method: 'POST', body: JSON.stringify(data) }),
+  deleteABTest: (id) => req(`/abtest/${id}`, { method: 'DELETE' }),
+  abTestResults: (id) => req(`/abtest/${id}/results`),
+
+  // Ad Spy
+  spySearch: (q, country = 'VN') => req(`/spy/search?q=${encodeURIComponent(q)}&country=${country}`),
+  spyWatched: () => req('/spy/watched'),
+  spyWatch: (pageId, pageName) => req('/spy/watch', { method: 'POST', body: JSON.stringify({ page_id: pageId, page_name: pageName }) }),
+  spyUnwatch: (pageId) => req(`/spy/watch/${pageId}`, { method: 'DELETE' }),
+
+  // Predict
+  predict: (accountId) => req(`/predict?account_id=${accountId}`),
+
+  // Landing Page Monitor
+  landingPages: () => req('/landing'),
+  addLandingPage: (url, name) => req('/landing/add', { method: 'POST', body: JSON.stringify({ url, name }) }),
+  deleteLandingPage: (id) => req(`/landing/${id}`, { method: 'DELETE' }),
+  checkLandingPages: () => req('/landing/status'),
+
+  // Auto Reply
+  autoReplyTemplates: () => req('/autoreply'),
+  createAutoReply: (data) => req('/autoreply', { method: 'POST', body: JSON.stringify(data) }),
+  updateAutoReply: (id, data) => req(`/autoreply/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteAutoReply: (id) => req(`/autoreply/${id}`, { method: 'DELETE' }),
+  autoReplyLog: () => req('/autoreply/log'),
+  autoReplyStats: () => req('/autoreply/stats'),
+  scanAutoReply: () => req('/autoreply/scan', { method: 'POST' }),
 };

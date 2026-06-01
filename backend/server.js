@@ -20,6 +20,16 @@ import tokenRoutes from './routes/token.js';
 import goalsRoutes, { loadGoals } from './routes/goals.js';
 import notesRoutes from './routes/notes.js';
 import launchRoutes from './routes/launch.js';
+import autorulesRoutes, { executeAutoRules } from './routes/autorules.js';
+import fatigueRoutes, { alertFatigue } from './routes/fatigue.js';
+import daypartingRoutes from './routes/dayparting.js';
+import overlapRoutes from './routes/overlap.js';
+import funnelRoutes from './routes/funnel.js';
+import abtestRoutes from './routes/abtest.js';
+import spyRoutes, { checkWatchedPages } from './routes/spy.js';
+import predictRoutes from './routes/predict.js';
+import landingRoutes, { checkLandingPages } from './routes/landing.js';
+import autoreplyRoutes, { scanAndReply } from './routes/autoreply.js';
 import { clear as cacheClear } from './cache.js';
 
 dotenv.config();
@@ -51,6 +61,16 @@ app.use('/api/token', tokenRoutes);
 app.use('/api/goals', goalsRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/launch', launchRoutes);
+app.use('/api/autorules', autorulesRoutes);
+app.use('/api/fatigue', fatigueRoutes);
+app.use('/api/dayparting', daypartingRoutes);
+app.use('/api/overlap', overlapRoutes);
+app.use('/api/funnel', funnelRoutes);
+app.use('/api/abtest', abtestRoutes);
+app.use('/api/spy', spyRoutes);
+app.use('/api/predict', predictRoutes);
+app.use('/api/landing', landingRoutes);
+app.use('/api/autoreply', autoreplyRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
@@ -171,6 +191,42 @@ cron.schedule('0 8-22 * * *', async () => {
   } catch (e) {
     console.error('Cron alert error:', e.message);
   }
+});
+
+// Auto Rules — every 30 minutes
+cron.schedule('*/30 8-22 * * *', async () => {
+  const fbToken = process.env.FB_ACCESS_TOKEN;
+  const fbAccount = process.env.FB_AD_ACCOUNT_ID;
+  if (!fbToken || !fbAccount) return;
+  try { await executeAutoRules(fbToken, fbAccount); } catch (e) { console.error('Cron autorules error:', e.message); }
+});
+
+// Creative Fatigue — daily at 9am
+cron.schedule('0 9 * * *', async () => {
+  const fbToken = process.env.FB_ACCESS_TOKEN;
+  const fbAccount = process.env.FB_AD_ACCOUNT_ID;
+  if (!fbToken || !fbAccount) return;
+  try { await alertFatigue(fbToken, fbAccount); } catch (e) { console.error('Cron fatigue error:', e.message); }
+});
+
+// Landing Page Monitor — every 15 minutes
+cron.schedule('*/15 * * * *', async () => {
+  try { await checkLandingPages(); } catch (e) { console.error('Cron landing error:', e.message); }
+});
+
+// Competitor Spy — daily at 10am
+cron.schedule('0 10 * * *', async () => {
+  const fbToken = process.env.FB_ACCESS_TOKEN;
+  if (!fbToken) return;
+  try { await checkWatchedPages(fbToken); } catch (e) { console.error('Cron spy error:', e.message); }
+});
+
+// Auto Reply — every 5 minutes during business hours
+cron.schedule('*/5 7-22 * * *', async () => {
+  const fbToken = process.env.FB_ACCESS_TOKEN;
+  const fbAccount = process.env.FB_AD_ACCOUNT_ID;
+  if (!fbToken || !fbAccount) return;
+  try { await scanAndReply(fbToken, fbAccount); } catch (e) { console.error('Cron autoreply error:', e.message); }
 });
 
 const PORT = process.env.PORT || 3001;

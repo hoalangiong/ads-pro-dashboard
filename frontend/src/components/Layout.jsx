@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, BarChart2, TrendingUp, Lightbulb, PlusCircle, Settings, Bell, DollarSign, LogOut, Users, GitCompare, PieChart, FileText, Image, Target } from 'lucide-react';
+import { LayoutDashboard, BarChart2, TrendingUp, Lightbulb, PlusCircle, Settings, Bell, DollarSign, LogOut, Users, GitCompare, PieChart, FileText, Image, Target, Zap, AlertTriangle, Clock, Users2, Filter, FlaskConical, Eye, Globe, MessageCircle } from 'lucide-react';
 import { api } from '../lib/api.js';
 
 const nav = [
@@ -14,6 +14,16 @@ const nav = [
   { to: '/wizard', icon: PlusCircle, label: 'Lên Camp' },
   { to: '/budget', icon: DollarSign, label: 'Budget' },
   { to: '/alerts', icon: Bell, label: 'Alerts', badge: true },
+  { to: '/autorules', icon: Zap, label: 'Auto Rules' },
+  { to: '/fatigue', icon: AlertTriangle, label: 'Fatigue' },
+  { to: '/dayparting', icon: Clock, label: 'Dayparting' },
+  { to: '/overlap', icon: Users2, label: 'Overlap' },
+  { to: '/funnel', icon: Filter, label: 'Funnel' },
+  { to: '/abtest', icon: FlaskConical, label: 'A/B Test' },
+  { to: '/spy', icon: Eye, label: 'Ad Spy' },
+  { to: '/predict', icon: TrendingUp, label: 'Predict' },
+  { to: '/landing', icon: Globe, label: 'Landing' },
+  { to: '/autoreply', icon: MessageCircle, label: 'Auto Reply' },
   { to: '/reports', icon: FileText, label: 'Báo cáo TG' },
   { to: '/goals', icon: Target, label: 'Mục tiêu KPI' },
   { to: '/users', icon: Users, label: 'Thành viên' },
