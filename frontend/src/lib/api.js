@@ -176,4 +176,6 @@ export const api = {
   updateLivestreamSchedule: (id, data) => req(`/livestream/schedules/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteLivestreamSchedule: (id) => req(`/livestream/schedules/${id}`, { method: 'DELETE' }),
   livestreamHistory: () => req('/livestream/history'),
+  livestreamProvinces: () => req('/livestream/provinces'),
+  livestreamTodayProvince: () => req('/livestream/today-province'),
 };

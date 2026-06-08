@@ -15,9 +15,15 @@ export default function Livestream() {
   const [boosting, setBoosting] = useState(false);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
-  const [boostForm, setBoostForm] = useState({ budget: 200000, age_min: 18, age_max: 65 });
-  const [newSchedule, setNewSchedule] = useState({ page_id: '', budget: 200000, age_min: 18, age_max: 65 });
+  const [boostForm, setBoostForm] = useState({ budget: 300000, age_min: 18, age_max: 65, random_province: true });
+  const [newSchedule, setNewSchedule] = useState({ page_id: '', budget: 300000, age_min: 18, age_max: 65, random_province: true });
+  const [todayProvince, setTodayProvince] = useState(null);
   const pollRef = useRef(null);
+
+  // Get today's random province
+  useEffect(() => {
+    api.livestreamTodayProvince().then(setTodayProvince).catch(() => {});
+  }, []);
 
   // Check live videos
   const checkLive = async () => {
@@ -37,12 +43,18 @@ export default function Livestream() {
   const boost = async (videoId) => {
     setBoosting(true); setError(''); setMsg('');
     try {
-      const result = await api.livestreamBoost({
+      const payload = {
         page_id: pageId,
         video_id: videoId,
-        ...boostForm,
-      });
-      setMsg(`Đã tạo boost campaign! ID: ${result.campaign_id}`);
+        budget: boostForm.budget,
+        age_min: boostForm.age_min,
+        age_max: boostForm.age_max,
+      };
+      if (boostForm.random_province && todayProvince) {
+        payload.regions = [{ key: todayProvince.key }];
+      }
+      const result = await api.livestreamBoost(payload);
+      setMsg(`Đã tạo boost! Campaign: ${result.campaign_id}${todayProvince && boostForm.random_province ? ` — Target: ${todayProvince.name}` : ''}`);
       checkLive();
       loadHistory();
     } catch (e) { setError(e.message); }
@@ -192,6 +204,16 @@ export default function Livestream() {
                     <input type="number" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1.5 text-sm" value={boostForm.age_max} onChange={e => setBoostForm(f => ({ ...f, age_max: parseInt(e.target.value) || 65 }))} />
                   </div>
                 </div>
+                {/* Province targeting */}
+                <div className="flex items-center gap-3 pt-1">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-600 bg-gray-700 text-red-500 focus:ring-red-500" checked={boostForm.random_province} onChange={e => setBoostForm(f => ({ ...f, random_province: e.target.checked }))} />
+                    <span className="text-xs text-gray-400">Random tỉnh mỗi ngày</span>
+                  </label>
+                  {boostForm.random_province && todayProvince && (
+                    <span className="text-xs bg-red-900/40 text-red-300 px-2 py-0.5 rounded-full">📍 Hôm nay: {todayProvince.name}</span>
+                  )}
+                </div>
                 <button onClick={() => boost(v.id)} disabled={boosting} className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors">
                   <Play size={14} /> {boosting ? 'Đang tạo...' : `Boost ngay — ${boostForm.budget.toLocaleString('vi-VN')}đ/ngày`}
                 </button>
@@ -215,14 +237,19 @@ export default function Livestream() {
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
             <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">Thêm lịch auto-boost</p>
             <p className="text-xs text-gray-500 mb-3">Khi page bắt đầu live → tự động tạo ad boost. Khi kết thúc live → tự tắt.</p>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-2">
               <input className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm" placeholder="Page ID" value={newSchedule.page_id} onChange={e => setNewSchedule(s => ({ ...s, page_id: e.target.value }))} />
-              <input type="number" className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm" placeholder="Budget (đ)" value={newSchedule.budget} onChange={e => setNewSchedule(s => ({ ...s, budget: parseInt(e.target.value) || 200000 }))} />
+              <input type="number" className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm" placeholder="Budget (đ)" value={newSchedule.budget} onChange={e => setNewSchedule(s => ({ ...s, budget: parseInt(e.target.value) || 300000 }))} />
               <input type="number" className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm" placeholder="Tuổi min" value={newSchedule.age_min} onChange={e => setNewSchedule(s => ({ ...s, age_min: parseInt(e.target.value) || 18 }))} />
               <button onClick={addSchedule} className="flex items-center justify-center gap-1.5 bg-brand-600 hover:bg-brand-700 rounded-lg text-sm px-3 py-2 transition-colors">
                 <Plus size={14} /> Thêm
               </button>
             </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-600 bg-gray-700 text-red-500 focus:ring-red-500" checked={newSchedule.random_province} onChange={e => setNewSchedule(s => ({ ...s, random_province: e.target.checked }))} />
+              <span className="text-xs text-gray-400">Random 1 tỉnh/thành mỗi ngày (63 tỉnh VN)</span>
+            </label>
+            {todayProvince && <p className="text-xs text-gray-600 mt-1">Hôm nay: <span className="text-red-400">{todayProvince.name}</span></p>}
           </div>
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">

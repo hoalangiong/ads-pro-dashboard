@@ -16,6 +16,92 @@ function loadSchedules() {
   if (!fs.existsSync(SCHEDULES_FILE)) return [];
   return JSON.parse(fs.readFileSync(SCHEDULES_FILE, 'utf8'));
 }
+
+// Vietnam provinces/cities for FB targeting (region keys)
+const VN_PROVINCES = [
+  { key: '3866', name: 'Hà Nội' },
+  { key: '3867', name: 'TP. Hồ Chí Minh' },
+  { key: '3868', name: 'Đà Nẵng' },
+  { key: '3869', name: 'Hải Phòng' },
+  { key: '3870', name: 'Cần Thơ' },
+  { key: '3871', name: 'An Giang' },
+  { key: '3872', name: 'Bà Rịa - Vũng Tàu' },
+  { key: '3873', name: 'Bắc Giang' },
+  { key: '3874', name: 'Bắc Kạn' },
+  { key: '3875', name: 'Bạc Liêu' },
+  { key: '3876', name: 'Bắc Ninh' },
+  { key: '3877', name: 'Bến Tre' },
+  { key: '3878', name: 'Bình Định' },
+  { key: '3879', name: 'Bình Dương' },
+  { key: '3880', name: 'Bình Phước' },
+  { key: '3881', name: 'Bình Thuận' },
+  { key: '3882', name: 'Cà Mau' },
+  { key: '3883', name: 'Cao Bằng' },
+  { key: '3884', name: 'Đắk Lắk' },
+  { key: '3885', name: 'Đắk Nông' },
+  { key: '3886', name: 'Điện Biên' },
+  { key: '3887', name: 'Đồng Nai' },
+  { key: '3888', name: 'Đồng Tháp' },
+  { key: '3889', name: 'Gia Lai' },
+  { key: '3890', name: 'Hà Giang' },
+  { key: '3891', name: 'Hà Nam' },
+  { key: '3892', name: 'Hà Tĩnh' },
+  { key: '3893', name: 'Hải Dương' },
+  { key: '3894', name: 'Hậu Giang' },
+  { key: '3895', name: 'Hòa Bình' },
+  { key: '3896', name: 'Hưng Yên' },
+  { key: '3897', name: 'Khánh Hòa' },
+  { key: '3898', name: 'Kiên Giang' },
+  { key: '3899', name: 'Kon Tum' },
+  { key: '3900', name: 'Lai Châu' },
+  { key: '3901', name: 'Lâm Đồng' },
+  { key: '3902', name: 'Lạng Sơn' },
+  { key: '3903', name: 'Lào Cai' },
+  { key: '3904', name: 'Long An' },
+  { key: '3905', name: 'Nam Định' },
+  { key: '3906', name: 'Nghệ An' },
+  { key: '3907', name: 'Ninh Bình' },
+  { key: '3908', name: 'Ninh Thuận' },
+  { key: '3909', name: 'Phú Thọ' },
+  { key: '3910', name: 'Phú Yên' },
+  { key: '3911', name: 'Quảng Bình' },
+  { key: '3912', name: 'Quảng Nam' },
+  { key: '3913', name: 'Quảng Ngãi' },
+  { key: '3914', name: 'Quảng Ninh' },
+  { key: '3915', name: 'Quảng Trị' },
+  { key: '3916', name: 'Sóc Trăng' },
+  { key: '3917', name: 'Sơn La' },
+  { key: '3918', name: 'Tây Ninh' },
+  { key: '3919', name: 'Thái Bình' },
+  { key: '3920', name: 'Thái Nguyên' },
+  { key: '3921', name: 'Thanh Hóa' },
+  { key: '3922', name: 'Thừa Thiên Huế' },
+  { key: '3923', name: 'Tiền Giang' },
+  { key: '3924', name: 'Trà Vinh' },
+  { key: '3925', name: 'Tuyên Quang' },
+  { key: '3926', name: 'Vĩnh Long' },
+  { key: '3927', name: 'Vĩnh Phúc' },
+  { key: '3928', name: 'Yên Bái' },
+];
+
+// Pick random province for today (seeded by date so consistent within a day)
+function getRandomProvinceForToday(excludeKeys = []) {
+  const available = VN_PROVINCES.filter(p => !excludeKeys.includes(p.key));
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  let hash = 0;
+  for (let i = 0; i < today.length; i++) hash = ((hash << 5) - hash) + today.charCodeAt(i);
+  const idx = Math.abs(hash) % available.length;
+  return available[idx];
+}
+
+// GET /api/livestream/provinces — list all VN provinces
+router.get('/provinces', requireAuth, (req, res) => res.json(VN_PROVINCES));
+
+// GET /api/livestream/today-province — get today's random province
+router.get('/today-province', requireAuth, (req, res) => {
+  const province = getRandomProvinceForToday();
+  res.json(province);
+});
 function saveSchedules(s) {
   fs.mkdirSync(path.dirname(SCHEDULES_FILE), { recursive: true });
   fs.writeFileSync(SCHEDULES_FILE, JSON.stringify(s, null, 2));
@@ -79,7 +165,7 @@ router.post('/boost', requireAuth, async (req, res) => {
   const fbAccount = res.locals.fbAccountId;
   if (!fbToken || !fbAccount) return res.status(400).json({ error: 'FB credentials required' });
 
-  const { page_id, video_id, budget, age_min = 18, age_max = 65, genders, geo_countries = ['VN'] } = req.body;
+  const { page_id, video_id, budget, age_min = 18, age_max = 65, genders, geo_countries = ['VN'], regions } = req.body;
   if (!page_id || !video_id) return res.status(400).json({ error: 'page_id and video_id required' });
   if (!budget || budget < 50000) return res.status(400).json({ error: 'Budget tối thiểu 50,000đ' });
 
@@ -101,7 +187,9 @@ router.post('/boost', requireAuth, async (req, res) => {
 
     // 2. Create ad set
     const targeting = {
-      geo_locations: { countries: geo_countries },
+      geo_locations: regions?.length
+        ? { regions: regions.map(r => ({ key: r.key || r })), country_groups: [] }
+        : { countries: geo_countries },
       age_min,
       age_max,
     };
@@ -267,11 +355,21 @@ export async function checkLivestreamSchedules(fbToken, fbAccount) {
         if (campData.error) continue;
 
         const targeting = {
-          geo_locations: { countries: schedule.geo_countries || ['VN'] },
           age_min: schedule.age_min || 18,
           age_max: schedule.age_max || 65,
         };
         if (schedule.genders?.length) targeting.genders = schedule.genders;
+
+        // Use random province if schedule has random_province enabled, else use specified regions or country
+        let targetProvince = null;
+        if (schedule.random_province) {
+          targetProvince = getRandomProvinceForToday();
+          targeting.geo_locations = { regions: [{ key: targetProvince.key }] };
+        } else if (schedule.regions?.length) {
+          targeting.geo_locations = { regions: schedule.regions.map(r => ({ key: r.key || r })) };
+        } else {
+          targeting.geo_locations = { countries: schedule.geo_countries || ['VN'] };
+        }
 
         const adsetR = await fetch(`${FB_API}/${fbAccount}/adsets`, {
           method: 'POST',
@@ -317,6 +415,7 @@ export async function checkLivestreamSchedules(fbToken, fbAccount) {
           video_title: liveVideo.title,
           campaign_id: campData.id,
           budget: schedule.budget || 200000,
+          province: targetProvince?.name || null,
           status: 'active',
           started_at: new Date().toISOString(),
           stopped_at: null,
@@ -325,7 +424,8 @@ export async function checkLivestreamSchedules(fbToken, fbAccount) {
         saveHistory(history);
 
         if (tgChatId) {
-          await sendMessage(tgChatId, `🔴 <b>Auto Live Boost Started!</b>\n\n📺 ${liveVideo.title || 'Live Stream'}\n💰 Budget: ${(schedule.budget || 200000).toLocaleString('vi-VN')}đ\n👁 Viewers: ${liveVideo.live_views || 0}\n\n🕐 ${new Date().toLocaleString('vi-VN')}`);
+          const provinceInfo = targetProvince ? `\n📍 Tỉnh: ${targetProvince.name}` : '';
+          await sendMessage(tgChatId, `🔴 <b>Auto Live Boost Started!</b>\n\n📺 ${liveVideo.title || 'Live Stream'}\n💰 Budget: ${(schedule.budget || 200000).toLocaleString('vi-VN')}đ${provinceInfo}\n👁 Viewers: ${liveVideo.live_views || 0}\n\n🕐 ${new Date().toLocaleString('vi-VN')}`);
         }
 
       } else if (!isLive && schedule.active_campaign_id) {
