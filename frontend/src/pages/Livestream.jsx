@@ -208,7 +208,7 @@ export default function Livestream() {
                 <div className="flex items-center gap-3 pt-1">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-600 bg-gray-700 text-red-500 focus:ring-red-500" checked={boostForm.random_province} onChange={e => setBoostForm(f => ({ ...f, random_province: e.target.checked }))} />
-                    <span className="text-xs text-gray-400">Random tỉnh mỗi ngày</span>
+                    <span className="text-xs text-gray-400">Random tỉnh phía Nam mỗi ngày</span>
                   </label>
                   {boostForm.random_province && todayProvince && (
                     <span className="text-xs bg-red-900/40 text-red-300 px-2 py-0.5 rounded-full">📍 Hôm nay: {todayProvince.name}</span>
@@ -247,7 +247,7 @@ export default function Livestream() {
             </div>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-600 bg-gray-700 text-red-500 focus:ring-red-500" checked={newSchedule.random_province} onChange={e => setNewSchedule(s => ({ ...s, random_province: e.target.checked }))} />
-              <span className="text-xs text-gray-400">Random 1 tỉnh/thành mỗi ngày (63 tỉnh VN)</span>
+              <span className="text-xs text-gray-400">Random 1 tỉnh phía Nam mỗi ngày (32 tỉnh)</span>
             </label>
             {todayProvince && <p className="text-xs text-gray-600 mt-1">Hôm nay: <span className="text-red-400">{todayProvince.name}</span></p>}
           </div>

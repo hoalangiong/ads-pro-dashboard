@@ -84,18 +84,53 @@ const VN_PROVINCES = [
   { key: '3928', name: 'Yên Bái' },
 ];
 
-// Pick random province for today (seeded by date so consistent within a day)
-function getRandomProvinceForToday(excludeKeys = []) {
-  const available = VN_PROVINCES.filter(p => !excludeKeys.includes(p.key));
+// Southern provinces only (from Đà Nẵng trở vào)
+const VN_SOUTH_PROVINCES = VN_PROVINCES.filter(p => [
+  '3867', // TP.HCM
+  '3868', // Đà Nẵng
+  '3870', // Cần Thơ
+  '3871', // An Giang
+  '3872', // Bà Rịa - Vũng Tàu
+  '3875', // Bạc Liêu
+  '3877', // Bến Tre
+  '3878', // Bình Định
+  '3879', // Bình Dương
+  '3880', // Bình Phước
+  '3881', // Bình Thuận
+  '3882', // Cà Mau
+  '3884', // Đắk Lắk
+  '3885', // Đắk Nông
+  '3887', // Đồng Nai
+  '3888', // Đồng Tháp
+  '3889', // Gia Lai
+  '3894', // Hậu Giang
+  '3897', // Khánh Hòa
+  '3898', // Kiên Giang
+  '3899', // Kon Tum
+  '3901', // Lâm Đồng
+  '3904', // Long An
+  '3908', // Ninh Thuận
+  '3910', // Phú Yên
+  '3912', // Quảng Nam
+  '3913', // Quảng Ngãi
+  '3916', // Sóc Trăng
+  '3918', // Tây Ninh
+  '3923', // Tiền Giang
+  '3924', // Trà Vinh
+  '3926', // Vĩnh Long
+].includes(p.key));
+
+// Pick random southern province for today (seeded by date so consistent within a day)
+function getRandomProvinceForToday() {
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
   let hash = 0;
   for (let i = 0; i < today.length; i++) hash = ((hash << 5) - hash) + today.charCodeAt(i);
-  const idx = Math.abs(hash) % available.length;
-  return available[idx];
+  const idx = Math.abs(hash) % VN_SOUTH_PROVINCES.length;
+  return VN_SOUTH_PROVINCES[idx];
 }
 
-// GET /api/livestream/provinces — list all VN provinces
-router.get('/provinces', requireAuth, (req, res) => res.json(VN_PROVINCES));
+// GET /api/livestream/provinces — list southern provinces
+router.get('/provinces', requireAuth, (req, res) => res.json(VN_SOUTH_PROVINCES));
 
 // GET /api/livestream/today-province — get today's random province
 router.get('/today-province', requireAuth, (req, res) => {
