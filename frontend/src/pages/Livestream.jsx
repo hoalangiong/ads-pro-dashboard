@@ -15,8 +15,8 @@ export default function Livestream() {
   const [boosting, setBoosting] = useState(false);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
-  const [boostForm, setBoostForm] = useState({ budget: 300000, age_min: 18, age_max: 65, random_province: true });
-  const [newSchedule, setNewSchedule] = useState({ page_id: '', budget: 300000, age_min: 18, age_max: 65, random_province: true });
+  const [boostForm, setBoostForm] = useState({ budget: 300000, age_min: 24, age_max: 65, random_province: true });
+  const [newSchedule, setNewSchedule] = useState({ page_id: '', budget: 300000, age_min: 24, age_max: 65, random_province: true });
   const [todayProvince, setTodayProvince] = useState(null);
   const pollRef = useRef(null);
 
