@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, BarChart2, TrendingUp, Lightbulb, PlusCircle, Settings, Bell, DollarSign, LogOut, Users, GitCompare, PieChart, FileText, Image, Target, Zap, AlertTriangle, Clock, Users2, Filter, FlaskConical, Eye, Globe, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, BarChart2, TrendingUp, Lightbulb, PlusCircle, Settings, Bell, DollarSign, LogOut, Users, GitCompare, PieChart, FileText, Image, Target, Zap, AlertTriangle, Clock, Users2, Filter, FlaskConical, Eye, Globe, MessageCircle, Radio } from 'lucide-react';
 import { api } from '../lib/api.js';
 
 const nav = [
@@ -24,6 +24,7 @@ const nav = [
   { to: '/predict', icon: TrendingUp, label: 'Predict' },
   { to: '/landing', icon: Globe, label: 'Landing' },
   { to: '/autoreply', icon: MessageCircle, label: 'Auto Reply' },
+  { to: '/livestream', icon: Radio, label: 'Livestream' },
   { to: '/reports', icon: FileText, label: 'Báo cáo TG' },
   { to: '/goals', icon: Target, label: 'Mục tiêu KPI' },
   { to: '/users', icon: Users, label: 'Thành viên' },

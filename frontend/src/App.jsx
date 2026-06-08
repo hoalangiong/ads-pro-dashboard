@@ -28,14 +28,11 @@ import Spy from './pages/Spy.jsx';
 import Predict from './pages/Predict.jsx';
 import Landing from './pages/Landing.jsx';
 import AutoReply from './pages/AutoReply.jsx';
+import Livestream from './pages/Livestream.jsx';
 
 function RequireAuth({ children }) {
   const jwt = localStorage.getItem('jwt');
   if (!jwt) return <Navigate to="/login" replace />;
-  // First-time setup: redirect to onboarding if no FB token
-  const fbToken = localStorage.getItem('fb_token');
-  const onboardingDone = localStorage.getItem('onboarding_done');
-  if (!fbToken && !onboardingDone) return <Navigate to="/onboarding" replace />;
   return children;
 }
 
@@ -73,6 +70,7 @@ export default function App() {
               <Route path="/predict" element={<Predict />} />
               <Route path="/landing" element={<Landing />} />
               <Route path="/autoreply" element={<AutoReply />} />
+              <Route path="/livestream" element={<Livestream />} />
             </Routes>
           </Layout>
         </RequireAuth>

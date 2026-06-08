@@ -30,6 +30,7 @@ import spyRoutes, { checkWatchedPages } from './routes/spy.js';
 import predictRoutes from './routes/predict.js';
 import landingRoutes, { checkLandingPages } from './routes/landing.js';
 import autoreplyRoutes, { scanAndReply } from './routes/autoreply.js';
+import livestreamRoutes, { checkLivestreamSchedules } from './routes/livestream.js';
 import { clear as cacheClear } from './cache.js';
 
 dotenv.config();
@@ -71,6 +72,7 @@ app.use('/api/spy', spyRoutes);
 app.use('/api/predict', predictRoutes);
 app.use('/api/landing', landingRoutes);
 app.use('/api/autoreply', autoreplyRoutes);
+app.use('/api/livestream', livestreamRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
@@ -227,6 +229,14 @@ cron.schedule('*/5 7-22 * * *', async () => {
   const fbAccount = process.env.FB_AD_ACCOUNT_ID;
   if (!fbToken || !fbAccount) return;
   try { await scanAndReply(fbToken, fbAccount); } catch (e) { console.error('Cron autoreply error:', e.message); }
+});
+
+// Livestream auto-boost — every 2 minutes during extended hours
+cron.schedule('*/2 7-23 * * *', async () => {
+  const fbToken = process.env.FB_ACCESS_TOKEN;
+  const fbAccount = process.env.FB_AD_ACCOUNT_ID;
+  if (!fbToken || !fbAccount) return;
+  try { await checkLivestreamSchedules(fbToken, fbAccount); } catch (e) { console.error('Cron livestream error:', e.message); }
 });
 
 const PORT = process.env.PORT || 3001;

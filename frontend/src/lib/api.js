@@ -165,4 +165,15 @@ export const api = {
   autoReplyLog: () => req('/autoreply/log'),
   autoReplyStats: () => req('/autoreply/stats'),
   scanAutoReply: () => req('/autoreply/scan', { method: 'POST' }),
+
+  // Livestream
+  livestreamLive: (pageId) => req(`/livestream/live?page_id=${pageId}`),
+  livestreamMetrics: (videoId) => req(`/livestream/metrics/${videoId}`),
+  livestreamBoost: (data) => req('/livestream/boost', { method: 'POST', body: JSON.stringify(data) }),
+  livestreamStop: (campaignId) => req(`/livestream/stop/${campaignId}`, { method: 'POST' }),
+  livestreamSchedules: () => req('/livestream/schedules'),
+  createLivestreamSchedule: (data) => req('/livestream/schedules', { method: 'POST', body: JSON.stringify(data) }),
+  updateLivestreamSchedule: (id, data) => req(`/livestream/schedules/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteLivestreamSchedule: (id) => req(`/livestream/schedules/${id}`, { method: 'DELETE' }),
+  livestreamHistory: () => req('/livestream/history'),
 };
